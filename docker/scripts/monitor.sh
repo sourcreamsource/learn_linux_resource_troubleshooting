@@ -184,6 +184,11 @@ warn_if_high() {
     # 세 번째 인자는 임계값이다.
     local limit="$3"
 
+    # 프로세스가 꺼져서 값이 비어 있는 경우 에러 방지
+    if [ -z "$value" ]; then
+        return 0
+    fi
+
     # awk로 소수점 숫자 비교를 수행한다.
     if awk "BEGIN { exit !($value > $limit) }"; then
         # 현재 값이 임계값보다 크면 경고를 출력한다.
