@@ -164,13 +164,13 @@ get_process_mem_usage() {
     ps -p "$pid" -o %mem= | awk '{print $1}'
 }
 
-# 특정 프로세스의 실제 메모리 상주 크기 RSS를 KB 단위로 구하는 함수를 만든다.
-get_process_rss_kb() {
+# 특정 프로세스의 실제 메모리 상주 크기 RSS를 MB 단위로 구하는 함수를 만든다.
+get_process_rss_mb() {
     # 첫 번째 인자로 받은 PID를 지역 변수에 저장한다.
     local pid="$1"
 
-    # ps로 해당 PID의 RSS 값만 출력한다.
-    ps -p "$pid" -o rss= | awk '{print $1}'
+    # ps로 해당 PID의 RSS 값을 가져와 1024로 나누어 MB 단위로 출력한다.
+    ps -p "$pid" -o rss= | awk '{printf "%.2f", $1/1024}'
 }
 
 # 특정 값이 임계값보다 크면 경고를 출력하는 함수를 만든다.
@@ -280,8 +280,8 @@ PROCESS_CPU_USAGE=$(get_process_cpu_usage "$PID")
 # 앱 프로세스 메모리 사용률을 구한다.
 PROCESS_MEM_USAGE=$(get_process_mem_usage "$PID")
 
-# 앱 프로세스 RSS 값을 KB 단위로 구한다.
-PROCESS_RSS_KB=$(get_process_rss_kb "$PID")
+# 앱 프로세스 RSS 값을 MB 단위로 구한다.
+PROCESS_RSS_MB=$(get_process_rss_mb "$PID")
 
 
 # ------------------------------------
@@ -307,7 +307,7 @@ print_line "Process CPU Usage : $PROCESS_CPU_USAGE%"
 print_line "Process MEM Usage : $PROCESS_MEM_USAGE%"
 
 # 앱 프로세스 RSS 값을 출력한다.
-print_line "Process RSS       : ${PROCESS_RSS_KB}KB"
+print_line "Process RSS       : ${PROCESS_RSS_MB}MB"
 
 
 # ------------------------------------
@@ -334,4 +334,4 @@ rotate_log_if_needed
 # ------------------------------------
 # 한 줄짜리 관제 결과를 monitor.log에 추가한다.
 # 각 항목 사이에 | 문자를 넣어 사람이 읽을 때 항목 경계를 쉽게 구분하게 한다.
-echo "[$NOW] PROCESS:$APP_NAME | PID:$PID | PORT:$PORT_STATUS | SYS_CPU:$SYSTEM_CPU_USAGE% | SYS_MEM:$SYSTEM_MEM_USAGE% | PROC_CPU:$PROCESS_CPU_USAGE% | PROC_MEM:$PROCESS_MEM_USAGE% | RSS:${PROCESS_RSS_KB}KB | DISK_USED:$DISK_USED%" >> "$LOG_FILE"
+echo "[$NOW] PROCESS:$APP_NAME | PID:$PID | PORT:$PORT_STATUS | SYS_CPU:$SYSTEM_CPU_USAGE% | SYS_MEM:$SYSTEM_MEM_USAGE% | PROC_CPU:$PROCESS_CPU_USAGE% | PROC_MEM:$PROCESS_MEM_USAGE% | RSS:${PROCESS_RSS_MB}MB | DISK_USED:$DISK_USED%" >> "$LOG_FILE"
